@@ -63,7 +63,7 @@ def fill_table(conn: pymysql.Connection, table_name: str, count: int) -> None:
                 elif "date" in field_type:
                     new_record[field_name] = date.today()
                 elif "timestamp" in field_type:
-                    new_record[field_name] = datetime.utcnow().strpfmt(
+                    new_record[field_name] = datetime.utcnow().strptime(
                         "%Y-%m-%d %H:%M:%S"
                     )
                 else:
