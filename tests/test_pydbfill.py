@@ -2,7 +2,7 @@ import unittest
 import pymysql
 import pytest
 
-from pydbfill.main import connection, describe_table, fill_table
+from pydbfill.pydbfill import connection, describe_table, fill_table
 
 
 HOST = "db"
