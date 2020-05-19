@@ -53,33 +53,39 @@ def describe_table(conn: pymysql.Connection, table_name: str) -> None:
 def fill_table(conn: pymysql.Connection, table_name: str, count: int) -> None:
     field_mapping = describe_table(conn, table_name)
 
-    with conn.cursor() as cursor:
-        # remove constraints so they dont ruin our style
-        cursor.execute("SET FOREIGN_KEY_CHECKS=0;")
+    try:
+        with conn.cursor() as cursor:
+            # remove constraints so they dont ruin our style
+            cursor.execute("SET FOREIGN_KEY_CHECKS=0;")
 
-        for _ in range(count):
-            new_record = {}
-            for field_name, field_type in field_mapping.items():
-                if "varchar" in field_type:
-                    new_record[field_name] = "'asdfsadf'"
-                elif "char(26)" in field_type:
-                    new_record[field_name] = f'"{uuid4().hex[:26]}"'
-                elif "char(32)" in field_type:
-                    new_record[field_name] = f'"{uuid4().hex[:32]}"'
-                elif "int" in field_type:
-                    new_record[field_name] = str(randint(1, 100))
-                elif "date" in field_type:
-                    new_record[field_name] = date.today().isoformat()
-                elif "timestamp" in field_type:
-                    tmp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-                    new_record[field_name] = f"'{tmp}'"
-                else:
-                    # idk
-                    new_record[field_name] = str(1)
+            for idx in range(count):
+                new_record = {}
+                for field_name, field_type in field_mapping.items():
+                    if "varchar" in field_type:
+                        size = int(field_type.split("(")[1].replace(")", ""))
+                        new_record[field_name] = f"'{uuid4().hex[:{size}]}'"
+                    elif "char" in field_type:
+                        size = int(field_type.split("(")[1].replace(")", ""))
+                        new_record[field_name] = f'"{uuid4().hex[:{size}]}"'
+                    elif "int" in field_type:
+                        # this could be random, or we can just increment it
+                        # and this way avoid having to worry about any uniqueness constraint
+                        new_record[field_name] = str(idx)
+                    elif "date" in field_type:
+                        new_record[field_name] = date.today().isoformat()
+                    elif "timestamp" in field_type:
+                        tmp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                        new_record[field_name] = f"'{tmp}'"
+                    else:
+                        # idk
+                        new_record[field_name] = str(1)
 
-            # TODO: prove this preserves ordering
-            sql = f"INSERT INTO {table_name} ({','.join(new_record.keys())}) values ({','.join(new_record.values())})"
-            cursor.execute(sql)
+                # TODO: prove this preserves ordering
+                sql = f"INSERT INTO {table_name} ({','.join(new_record.keys())}) values ({','.join(new_record.values())})"
+                cursor.execute(sql)
+        conn.commit()
+    finally:
+        conn.close()
 
 
 if __name__ == "__main__":
