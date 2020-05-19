@@ -4,6 +4,7 @@ import pymysql
 from datetime import date, datetime
 from random import randint
 from typing import Dict
+from uuid import uuid4
 
 parser = argparse.ArgumentParser(description="write some shit to some tables")
 
@@ -58,17 +59,20 @@ def fill_table(conn: pymysql.Connection, table_name: str, count: int) -> None:
             for field_name, field_type in field_mapping.items():
                 if "varchar" in field_type:
                     new_record[field_name] = "'asdfsadf'"
+                elif "char(26)" in field_type:
+                    new_record[field_name] = f'"{uuid4().hex[:26]}"'
+                elif "char(32)" in field_type:
+                    new_record[field_name] = f'"{uuid4().hex[:32]}"'
                 elif "int" in field_type:
-                    new_record[field_name] = randint(1, 100)
+                    new_record[field_name] = str(randint(1, 100))
                 elif "date" in field_type:
-                    new_record[field_name] = date.today()
+                    new_record[field_name] = date.today().isoformat()
                 elif "timestamp" in field_type:
-                    new_record[field_name] = datetime.utcnow().strptime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
+                    tmp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                    new_record[field_name] = f"'{tmp}'"
                 else:
                     # idk
-                    new_record[field_name] = 1
+                    new_record[field_name] = str(1)
 
             # TODO: prove this preserves ordering
             sql = f"INSERT INTO {table_name} ({','.join(new_record.keys())}) values ({','.join(new_record.values())})"
