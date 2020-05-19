@@ -54,6 +54,9 @@ def fill_table(conn: pymysql.Connection, table_name: str, count: int) -> None:
     field_mapping = describe_table(conn, table_name)
 
     with conn.cursor() as cursor:
+        # remove constraints so they dont ruin our style
+        cursor.execute("SET FOREIGN_KEY_CHECKS=0;")
+
         for _ in range(count):
             new_record = {}
             for field_name, field_type in field_mapping.items():
