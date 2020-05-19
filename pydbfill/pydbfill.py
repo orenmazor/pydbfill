@@ -34,7 +34,7 @@ def connection(host: str, port: int, username: str, password: str, db: str) -> N
 def describe_table(conn: pymysql.Connection, table_name: str) -> None:
     """Return a list of fields and their types for a given table."""
     with conn.cursor() as cursor:
-        cursor.execute("DESCRIBE users;")
+        cursor.execute(f"DESCRIBE {table_name};")
         result = cursor.fetchall()
 
         # drop auto_incrementing fields
