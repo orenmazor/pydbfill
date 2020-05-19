@@ -1,0 +1,15 @@
+version: "3"
+services:
+  runner:
+    build: .
+    volumes:
+      - .:/app
+  db:
+    image: mysql:5.7
+    ports:
+     - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=0xDEADBEEF
+      - MYSQL_DATABASE=test
+    volumes:
+      - ./prepopulated_db_data:/docker-entrypoint-initdb.d/:ro
