@@ -62,10 +62,10 @@ def fill_table(conn: pymysql.Connection, table_name: str, count: int) -> None:
             for field_name, field_type in field_mapping.items():
                 if "varchar" in field_type:
                     size = int(field_type.split("(")[1].replace(")", ""))
-                    new_record[field_name] = f"'{uuid4().hex[:{size}]}'"
+                    new_record[field_name] = f"'{uuid4().hex[:size]}'"
                 elif "char" in field_type:
                     size = int(field_type.split("(")[1].replace(")", ""))
-                    new_record[field_name] = f'"{uuid4().hex[:{size}]}"'
+                    new_record[field_name] = f'"{uuid4().hex[:size]}"'
                 elif "tinyint" in field_type:
                     new_record[field_name] = str(1)
                 elif "int" in field_type:
